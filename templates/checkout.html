@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout — Wrap & Bloom{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8 text-center">
+      <h1 class="font-serif text-4xl text-gray-900 mb-2">Checkout</h1>
+      <p class="text-gray-500 font-light">Complete your details and place your order.</p>
+    </div>
+
+    {% if not items %}
+      <div class="text-center py-12 bg-blush-50 rounded-3xl border border-blush-100 max-w-2xl mx-auto">
+        <p class="text-gray-500 font-light mb-6 text-lg">Your cart is empty.</p>
+        <a href="{{ url_for('main.products') }}" class="inline-block bg-white text-blush-600 border border-blush-200 hover:bg-blush-50 font-medium px-6 py-3 rounded-full transition-colors shadow-sm">
+          Shop Now
+        </a>
+      </div>
+    {% else %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-7">
+        <div class="bg-white border border-blush-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+          <h2 class="font-serif text-2xl text-gray-900 mb-6">Delivery Details</h2>
+
+          <form id="checkout-form" method="POST" action="{{ url_for('main.checkout') }}" novalidate class="space-y-5">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <input id="full_name" name="full_name" value="{{ form_data.get('full_name','') }}" autocomplete="name"
+                       class="w-full px-4 py-3 rounded-xl border {% if errors.get('full_name') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                       placeholder="Your full name">
+                <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="full_name">{{ errors.get('full_name','') }}</p>
+              </div>
+
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                <input id="phone" name="phone" value="{{ form_data.get('phone','') }}" inputmode="numeric" autocomplete="tel"
+                       class="w-full px-4 py-3 rounded-xl border {% if errors.get('phone') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                       placeholder="10 digit number">
+                <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="phone">{{ errors.get('phone','') }}</p>
+              </div>
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <input id="email" name="email" value="{{ form_data.get('email','') }}" autocomplete="email"
+                     class="w-full px-4 py-3 rounded-xl border {% if errors.get('email') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                     placeholder="you@example.com">
+              <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="email">{{ errors.get('email','') }}</p>
+            </div>
+
+            <div>
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Full Address</label>
+              <textarea id="address" name="address" rows="3"
+                        class="w-full px-4 py-3 rounded-xl border {% if errors.get('address') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                        placeholder="House no, street, landmark...">{{ form_data.get('address','') }}</textarea>
+              <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="address">{{ errors.get('address','') }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div>
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                <input id="city" name="city" value="{{ form_data.get('city','') }}" autocomplete="address-level2"
+                       class="w-full px-4 py-3 rounded-xl border {% if errors.get('city') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                       placeholder="City">
+                <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="city">{{ errors.get('city','') }}</p>
+              </div>
+
+              <div>
+                <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State</label>
+                <input id="state" name="state" value="{{ form_data.get('state','') }}" autocomplete="address-level1"
+                       class="w-full px-4 py-3 rounded-xl border {% if errors.get('state') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                       placeholder="State">
+                <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="state">{{ errors.get('state','') }}</p>
+              </div>
+
+              <div>
+                <label for="pincode" class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+                <input id="pincode" name="pincode" value="{{ form_data.get('pincode','') }}" inputmode="numeric" autocomplete="postal-code"
+                       class="w-full px-4 py-3 rounded-xl border {% if errors.get('pincode') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-blush-50/50{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                       placeholder="6 digits">
+                <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="pincode">{{ errors.get('pincode','') }}</p>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <h2 class="font-serif text-2xl text-gray-900 mb-4">Payment Method</h2>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label class="cursor-pointer">
+                  <input type="radio" name="payment_method" value="upi" class="peer sr-only" {% if (form_data.get('payment_method') or 'upi') == 'upi' %}checked{% endif %}>
+                  <div class="p-4 rounded-2xl border border-blush-200 bg-white peer-checked:border-gray-900 peer-checked:ring-2 peer-checked:ring-gray-900/10 transition">
+                    <p class="font-medium text-gray-900">UPI</p>
+                    <p class="text-xs text-gray-500 mt-1">Pay with UPI ID</p>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="payment_method" value="card" class="peer sr-only" {% if form_data.get('payment_method') == 'card' %}checked{% endif %}>
+                  <div class="p-4 rounded-2xl border border-blush-200 bg-white peer-checked:border-gray-900 peer-checked:ring-2 peer-checked:ring-gray-900/10 transition">
+                    <p class="font-medium text-gray-900">Card</p>
+                    <p class="text-xs text-gray-500 mt-1">Debit / Credit</p>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="payment_method" value="cod" class="peer sr-only" {% if form_data.get('payment_method') == 'cod' %}checked{% endif %}>
+                  <div class="p-4 rounded-2xl border border-blush-200 bg-white peer-checked:border-gray-900 peer-checked:ring-2 peer-checked:ring-gray-900/10 transition">
+                    <p class="font-medium text-gray-900">COD</p>
+                    <p class="text-xs text-gray-500 mt-1">Cash on delivery</p>
+                  </div>
+                </label>
+              </div>
+              <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="payment_method">{{ errors.get('payment_method','') }}</p>
+
+              <div id="upi-section" class="mt-5 hidden">
+                <div class="rounded-2xl border border-blush-100 bg-blush-50/50 p-5">
+                  <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="w-full sm:w-40 h-40 rounded-2xl bg-white border border-blush-100 overflow-hidden flex items-center justify-center">
+                      <img src="{{ url_for('static', filename=upi_qr_static) }}" alt="UPI QR" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                      <div class="text-xs text-gray-400 p-4 text-center">UPI QR (optional)</div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm text-gray-700 font-medium">UPI ID</p>
+                      <p class="text-xs text-gray-500 mb-3">You can pay to <span class="font-medium">{{ upi_default_id }}</span> and then place order.</p>
+                      <input id="upi_id" name="upi_id" value="{{ form_data.get('payment_meta',{}).get('upi_id','') }}" placeholder="yourname@bank"
+                             class="w-full px-4 py-3 rounded-xl border {% if errors.get('upi_id') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-white{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400">
+                      <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="upi_id">{{ errors.get('upi_id','') }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="card-section" class="mt-5 hidden">
+                <div class="rounded-2xl border border-blush-100 bg-blush-50/50 p-5">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="sm:col-span-2">
+                      <label for="card_name" class="block text-sm font-medium text-gray-700 mb-2">Name on Card</label>
+                      <input id="card_name" name="card_name" value="{{ form_data.get('card_name','') }}"
+                             class="w-full px-4 py-3 rounded-xl border {% if errors.get('card_name') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-white{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                             placeholder="Name as on card">
+                      <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="card_name">{{ errors.get('card_name','') }}</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                      <label for="card_number" class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                      <input id="card_number" name="card_number" value="{{ form_data.get('card_number','') }}" inputmode="numeric"
+                             class="w-full px-4 py-3 rounded-xl border {% if errors.get('card_number') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-white{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                             placeholder="1234 5678 9012 3456">
+                      <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="card_number">{{ errors.get('card_number','') }}</p>
+                    </div>
+                    <div>
+                      <label for="card_expiry" class="block text-sm font-medium text-gray-700 mb-2">Expiry (MM/YY)</label>
+                      <input id="card_expiry" name="card_expiry" value="{{ form_data.get('card_expiry','') }}"
+                             class="w-full px-4 py-3 rounded-xl border {% if errors.get('card_expiry') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-white{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                             placeholder="08/28">
+                      <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="card_expiry">{{ errors.get('card_expiry','') }}</p>
+                    </div>
+                    <div>
+                      <label for="card_cvv" class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                      <input id="card_cvv" name="card_cvv" value="{{ form_data.get('card_cvv','') }}" inputmode="numeric"
+                             class="w-full px-4 py-3 rounded-xl border {% if errors.get('card_cvv') %}border-red-300 bg-red-50{% else %}border-blush-200 bg-white{% endif %} focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors text-gray-900 placeholder-gray-400"
+                             placeholder="123">
+                      <p class="mt-2 text-xs text-red-600 min-h-[1rem]" data-error-for="card_cvv">{{ errors.get('card_cvv','') }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 flex flex-col sm:flex-row gap-3">
+              <button type="button" id="pay-now-btn" class="sm:flex-1 bg-white hover:bg-blush-50 text-gray-900 font-medium px-6 py-4 rounded-xl transition-colors shadow-sm border border-blush-200">
+                Pay Now
+              </button>
+              <button type="submit" id="place-order-btn" class="sm:flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-4 rounded-xl transition-colors shadow-md hover:shadow-lg">
+                Place Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <aside class="lg:col-span-5">
+        <div class="sticky top-28">
+          <div class="bg-white border border-blush-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h2 class="font-serif text-2xl text-gray-900 mb-6">Order Summary</h2>
+            <div class="space-y-4">
+              {% for item in items %}
+              <div class="flex gap-4">
+                <div class="w-16 h-16 rounded-2xl overflow-hidden bg-blush-50 border border-blush-100 flex items-center justify-center flex-shrink-0">
+                  {% if item.product["image"] %}
+                    <img src="{{ url_for('static', filename='uploads/' + item.product['image']) }}" alt="{{ item.product['name'] }}" class="w-full h-full object-cover">
+                  {% else %}
+                    <svg class="w-7 h-7 text-blush-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  {% endif %}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-gray-900 font-medium truncate">{{ item.product["name"] }}</p>
+                  <p class="text-xs text-gray-500 mt-1">Qty: {{ item.quantity }}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-gray-900 font-medium">₹{{ "%.2f"|format(item.line_total) }}</p>
+                  <p class="text-xs text-gray-500">₹{{ "%.2f"|format(item.product["price"]) }} each</p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="mt-6 pt-5 border-t border-blush-100">
+              <div class="flex justify-between items-center">
+                <p class="text-gray-600 font-medium">Total amount</p>
+                <p class="text-gray-900 font-bold text-xl">₹{{ "%.2f"|format(total) }}</p>
+              </div>
+              <p class="mt-2 text-xs text-gray-500">Taxes/shipping (if any) will be confirmed on call.</p>
+            </div>
+          </div>
+          <div class="mt-4 text-center">
+            <a href="{{ url_for('main.cart') }}" class="text-blush-700 hover:text-blush-800 font-medium">Back to cart</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
+      <div class="relative h-full flex items-center justify-center px-6">
+        <div class="bg-white rounded-3xl border border-blush-100 shadow-xl p-8 w-full max-w-sm text-center">
+          <div class="mx-auto w-12 h-12 rounded-full border-4 border-blush-200 border-t-gray-900 animate-spin"></div>
+          <p class="mt-5 font-medium text-gray-900">Processing…</p>
+          <p class="mt-1 text-sm text-gray-500">Please wait a moment.</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+

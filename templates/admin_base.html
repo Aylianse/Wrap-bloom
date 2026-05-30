@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel — Wrap & Bloom{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: {
+                            50: '#fdf8f9',
+                            100: '#faeff1',
+                            200: '#f4dbe0',
+                            300: '#ecbdc5',
+                            400: '#e197a5',
+                            500: '#d37184',
+                            600: '#be5368',
+                            700: '#a04254',
+                            800: '#853847',
+                            900: '#71313e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        .sidebar-item { transition: all 0.2s ease-in-out; }
+        .sidebar-item:hover, .sidebar-item.active { background-color: rgba(255, 255, 255, 0.1); color: #fff; }
+        .sidebar-item.active { border-left: 3px solid #d37184; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-900">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 text-gray-300 flex-shrink-0 flex flex-col h-full hidden md:flex transition-all">
+        <div class="h-16 flex items-center px-6 border-b border-gray-800">
+            <a href="{{ url_for('main.dashboard') }}" class="font-serif text-2xl text-white font-semibold">W&B Admin</a>
+        </div>
+        <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+            <a href="{{ url_for('main.dashboard') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('main.admin_products') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint in ['main.admin_products', 'main.add', 'main.admin_edit_product'] %}active{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                Products
+            </a>
+            <a href="{{ url_for('main.admin_categories') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.admin_categories' %}active{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Categories
+            </a>
+            <!-- Orders is in dashboard for now, but we can highlight it here -->
+            <a href="{{ url_for('main.home_images') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.home_images' %}active{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Home Images
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50">
+        <!-- Top Navbar -->
+        <header class="h-16 flex-shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10 shadow-sm">
+            <div class="flex items-center md:hidden">
+                <button type="button" class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="document.getElementById('mobile-sidebar').classList.toggle('hidden')">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 md:flex-none flex justify-center md:justify-start">
+                <a href="{{ url_for('main.index') }}" target="_blank" class="text-sm font-medium text-blush-600 hover:text-blush-800 transition-colors flex items-center gap-1.5 bg-blush-50 px-3 py-1.5 rounded-full border border-blush-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    View Storefront
+                </a>
+            </div>
+            <div class="flex items-center">
+                <span class="text-sm text-gray-600 font-medium hidden sm:block">Welcome, Admin</span>
+                <div class="ml-4 w-8 h-8 rounded-full bg-blush-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="fixed top-20 right-6 z-50 flex flex-col gap-2 max-w-sm">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="px-4 py-3 rounded-xl shadow-lg border text-sm font-medium flex items-start gap-3 transform transition-all duration-300 translate-y-0 opacity-100 flash-message
+                            {% if category == 'error' %}bg-white border-red-200 text-red-700
+                            {% else %}bg-white border-green-200 text-green-700{% endif %}">
+                            {% if category == 'error' %}
+                                <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {% else %}
+                                <svg class="w-5 h-5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {% endif %}
+                            <div class="flex-grow">{{ message }}</div>
+                            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelectorAll('.flash-message').forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-10px)';
+                    setTimeout(() => el.remove(), 300);
+                });
+            }, 4000);
+        </script>
+
+        <!-- Main Scrolling Content -->
+        <div class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Mobile Sidebar Backdrop & Menu (Simplified) -->
+    <div id="mobile-sidebar" class="fixed inset-0 z-40 hidden md:hidden">
+        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" onclick="document.getElementById('mobile-sidebar').classList.add('hidden')"></div>
+        <div class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-gray-300 flex flex-col h-full transform transition-transform">
+            <div class="h-16 flex items-center px-6 border-b border-gray-800 justify-between">
+                <span class="font-serif text-2xl text-white font-semibold">W&B Admin</span>
+                <button onclick="document.getElementById('mobile-sidebar').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="flex-1 px-3 py-6 space-y-1">
+                <a href="{{ url_for('main.dashboard') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('main.admin_products') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint in ['main.admin_products', 'main.add', 'main.admin_edit_product'] %}active{% endif %}">Products</a>
+                <a href="{{ url_for('main.admin_categories') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.admin_categories' %}active{% endif %}">Categories</a>
+                <a href="{{ url_for('main.home_images') }}" class="sidebar-item group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {% if request.endpoint == 'main.home_images' %}active{% endif %}">Home Images</a>
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

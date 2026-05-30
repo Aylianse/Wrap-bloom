@@ -1,0 +1,152 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Order {{ order.order_id }} — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                <a href="{{ url_for('main.dashboard') }}" class="hover:text-gray-900">Dashboard</a>
+                <span>/</span>
+                <span class="text-gray-900 font-medium">Order {{ order.order_id }}</span>
+            </div>
+            <h1 class="font-serif text-3xl text-gray-900 mb-2">Order Details</h1>
+            <p class="text-sm text-gray-500 font-mono">{{ order.created_at }}</p>
+        </div>
+        
+        <!-- Status Update -->
+        <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200">
+            <form method="POST" action="{{ url_for('main.admin_update_order_status', order_id=order.order_id) }}" class="flex items-center gap-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label class="text-sm font-medium text-gray-700 pl-2">Status:</label>
+                <select name="status" onchange="this.form.submit();"
+                        class="text-sm font-semibold px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blush-300 transition-colors
+                        {% if order.status == 'placed' %} text-blue-600 bg-blue-50 border-blue-200
+                        {% elif order.status == 'processing' %} text-yellow-600 bg-yellow-50 border-yellow-200
+                        {% elif order.status == 'shipped' %} text-orange-600 bg-orange-50 border-orange-200
+                        {% elif order.status == 'completed' %} text-green-600 bg-green-50 border-green-200
+                        {% else %} text-red-600 bg-red-50 border-red-200 {% endif %}">
+                    <option value="placed" {% if order.status == 'placed' %}selected{% endif %}>Placed</option>
+                    <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Main Column -->
+        <div class="lg:col-span-2 space-y-8">
+            
+            <!-- Items List -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-200 bg-gray-50/50">
+                    <h3 class="text-lg font-medium text-gray-900">Ordered Items</h3>
+                </div>
+                
+                <div class="divide-y divide-gray-100">
+                    {% for item in items %}
+                    <div class="p-6 flex items-center gap-6 hover:bg-gray-50 transition-colors">
+                        <div class="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200">
+                            {% if item.image %}
+                                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-300">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-medium text-gray-900 text-lg truncate">{{ item.name }}</h4>
+                            <div class="mt-1 flex items-center gap-4 text-sm text-gray-500">
+                                <span>₹{{ "%.2f"|format(item.price) }}</span>
+                                <span>&times;</span>
+                                <span class="font-medium text-gray-900">Qty: {{ item.quantity }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right">
+                            <span class="font-semibold text-gray-900 text-lg">₹{{ "%.2f"|format(item.price * item.quantity) }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="bg-gray-50 p-6 border-t border-gray-200 flex justify-between items-center">
+                    <span class="text-gray-500 font-medium text-lg">Total Amount</span>
+                    <span class="text-2xl font-serif text-gray-900 font-semibold">₹{{ "%.2f"|format(order.total_amount) }}</span>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Sidebar Column -->
+        <div class="space-y-8">
+            
+            <!-- Customer Info -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Customer</h3>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ order.full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Contact Details</p>
+                        <p class="text-sm text-gray-900">{{ order.email }}</p>
+                        <p class="text-sm text-gray-900 mt-1">{{ order.phone }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Info -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Shipping</h3>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-gray-900 leading-relaxed">
+                        {{ order.address }}<br>
+                        {{ order.city }}, {{ order.state }}<br>
+                        {{ order.pincode }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Payment Info -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Payment</h3>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="px-3 py-1 bg-gray-100 border border-gray-200 rounded-lg text-xs font-semibold text-gray-800 uppercase tracking-wide">
+                            {{ order.payment_method }}
+                        </span>
+                    </div>
+                    
+                    {% if order.payment_meta %}
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1.5">Meta Data</p>
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <span class="font-mono text-[10px] text-gray-600 block break-all leading-tight">{{ order.payment_meta }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

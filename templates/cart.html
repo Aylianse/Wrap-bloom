@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Cart — Wrap & Bloom{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 text-center">
+            <h1 class="font-serif text-4xl text-gray-900 mb-3">Your Cart</h1>
+            <p class="text-gray-500 font-light">Review items and place your order.</p>
+        </div>
+
+        {% if items %}
+        <div class="space-y-4">
+            {% for item in items %}
+            <div class="bg-blush-50 border border-blush-100 rounded-2xl p-5 flex gap-4 items-center">
+                <div class="w-20 h-20 rounded-xl overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
+                    {% if item.product["image"] %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.product['image']) }}" alt="{{ item.product['name'] }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <svg class="w-10 h-10 text-blush-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    {% endif %}
+                </div>
+
+                <div class="flex-grow">
+                    <h3 class="font-serif text-lg text-gray-900 truncate">{{ item.product["name"] }}</h3>
+                    <p class="text-gray-600 text-sm mt-1">
+                        Price: ₹{{ "%.2f"|format(item.product["price"]) }} x {{ item.quantity }}
+                    </p>
+                    <p class="text-gray-900 font-medium mt-1">
+                        Line Total: ₹{{ "%.2f"|format(item.line_total) }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-8 bg-white border border-blush-100 rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-gray-600 font-medium">Total</p>
+                <p class="text-gray-900 font-bold text-xl">₹{{ "%.2f"|format(total) }}</p>
+            </div>
+            <a href="{{ url_for('main.checkout') }}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white font-medium px-8 py-4 rounded-xl transition-colors shadow-md hover:shadow-lg">
+                Checkout
+            </a>
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('main.products') }}" class="text-blush-700 hover:text-blush-800 font-medium">Continue Shopping</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-blush-50 rounded-3xl border border-blush-100 max-w-2xl mx-auto">
+            <p class="text-gray-500 font-light mb-6 text-lg">Your cart is empty.</p>
+            <a href="{{ url_for('main.products') }}" class="inline-block bg-white text-blush-600 border border-blush-200 hover:bg-blush-50 font-medium px-6 py-3 rounded-full transition-colors shadow-sm">
+                Shop Now
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

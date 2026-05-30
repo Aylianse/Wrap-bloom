@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Products — Wrap & Bloom{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h1 class="font-serif text-4xl text-gray-900 mb-3">
+                {% if selected_category %}{{ selected_category }}{% else %}All Products{% endif %}
+            </h1>
+            <p class="text-gray-500 font-light">
+                {% if selected_category %}Curated picks from this category.{% else %}Discover our full collection.{% endif %}
+            </p>
+        </div>
+
+        <!-- Search, Category & Sort Filters -->
+        <div class="mb-12 p-6 bg-blush-50/30 border border-blush-100 rounded-3xl">
+          <form method="GET" action="{{ url_for('main.products') }}" class="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            <!-- Categories Pills -->
+            <div class="w-full lg:w-auto flex flex-wrap gap-2 justify-center lg:justify-start">
+              <a href="{{ url_for('main.products', q=search_query, sort=sort_by) }}" 
+                 class="px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200
+                 {% if not selected_category %}
+                   bg-gray-900 text-white border-gray-900
+                 {% else %}
+                   bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
+                 {% endif %}">
+                All Shop
+              </a>
+              {% for category in categories %}
+                <a href="{{ url_for('main.products', category=category, q=search_query, sort=sort_by) }}" 
+                   class="px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200
+                   {% if selected_category == category %}
+                     bg-gray-900 text-white border-gray-900
+                   {% else %}
+                     bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
+                   {% endif %}">
+                  {{ category }}
+                </a>
+              {% endfor %}
+            </div>
+
+            <!-- Search and Sorting Inputs -->
+            <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-4 items-center justify-end">
+              <!-- Search bar -->
+              <div class="relative w-full sm:w-[220px]">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search bouquets..."
+                       class="w-full pl-9 pr-4 py-2.5 rounded-full border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-xs text-gray-900 placeholder-gray-400 shadow-sm">
+              </div>
+
+              <!-- Sorting selector -->
+              <div class="relative w-full sm:w-auto">
+                <select name="sort" onchange="this.form.submit();"
+                        class="w-full sm:w-auto px-4 py-2.5 rounded-full border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-xs text-gray-600 shadow-sm">
+                  <option value="" {% if not sort_by %}selected{% endif %}>Latest</option>
+                  <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                  <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                  <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A-Z</option>
+                </select>
+              </div>
+
+              <!-- Keep category in form context -->
+              {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+              {% endif %}
+
+              <button type="submit" class="hidden">Submit</button>
+            </div>
+          </form>
+        </div>
+
+        {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for product in products %}
+            <div class="group bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-blush-50">
+                <div class="aspect-[4/5] bg-blush-50 relative overflow-hidden flex items-center justify-center">
+                    {% if product["image"] %}
+                    <img src="{{ url_for('static', filename='uploads/' + product['image']) }}" alt="{{ product['name'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                    {% else %}
+                    <div class="absolute inset-0 flex items-center justify-center text-blush-200">
+                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="font-serif text-lg text-gray-900 mb-2 truncate">{{ product["name"] }}</h3>
+                    {% if product["category"] %}
+                    <p class="text-xs text-gray-500 mb-2">{{ product["category"] }}</p>
+                    {% endif %}
+                    <p class="text-blush-600 font-medium">₹{{ "%.2f"|format(product["price"]) }}</p>
+
+                    <div class="mt-4 flex items-center justify-center gap-3">
+                        <form method="POST" action="{{ url_for('main.cart_add', product_id=product['id']) }}">
+                            <button type="submit" class="bg-white/90 backdrop-blur-sm text-gray-900 hover:text-blush-600 font-medium text-sm px-5 py-2 rounded-full shadow-sm transition-colors flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                Add
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('main.buy_now', product_id=product['id']) }}">
+                            <button type="submit" class="bg-gray-900 hover:bg-gray-800 text-white font-medium text-sm px-5 py-2 rounded-full shadow-sm transition-colors">
+                                Buy
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-blush-50 rounded-3xl border border-blush-100 max-w-2xl mx-auto">
+            <p class="text-gray-500 font-light mb-6 text-lg">No products available in this section yet.</p>
+            <a href="{{ url_for('main.add') }}" class="inline-block bg-white text-blush-600 border border-blush-200 hover:bg-blush-50 font-medium px-6 py-3 rounded-full transition-colors shadow-sm">
+                Add Product
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

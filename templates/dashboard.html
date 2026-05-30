@@ -1,0 +1,273 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="font-serif text-3xl text-gray-900 mb-1">Overview</h1>
+      <p class="text-sm text-gray-500 font-light">Monitor your store's performance and recent activities.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <!-- Total Sales -->
+      <div class="bg-gradient-to-br from-white to-blush-50 rounded-2xl border border-blush-100 p-6 shadow-sm flex items-center gap-5">
+        <div class="w-12 h-12 rounded-xl bg-blush-100 border border-blush-200 flex items-center justify-center text-blush-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Revenue</p>
+          <h3 class="text-2xl font-semibold text-gray-900 mt-1">₹{{ "%.2f"|format(stats.total_sales) }}</h3>
+        </div>
+      </div>
+
+      <!-- Total Orders -->
+      <div class="bg-gradient-to-br from-white to-blush-50 rounded-2xl border border-blush-100 p-6 shadow-sm flex items-center gap-5">
+        <div class="w-12 h-12 rounded-xl bg-blush-100 border border-blush-200 flex items-center justify-center text-blush-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Orders</p>
+          <h3 class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.total_orders }}</h3>
+        </div>
+      </div>
+
+      <!-- Total Products -->
+      <div class="bg-gradient-to-br from-white to-blush-50 rounded-2xl border border-blush-100 p-6 shadow-sm flex items-center gap-5">
+        <div class="w-12 h-12 rounded-xl bg-blush-100 border border-blush-200 flex items-center justify-center text-blush-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Products</p>
+          <h3 class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.total_products }}</h3>
+        </div>
+      </div>
+
+      <!-- Total Categories -->
+      <div class="bg-gradient-to-br from-white to-blush-50 rounded-2xl border border-blush-100 p-6 shadow-sm flex items-center gap-5">
+        <div class="w-12 h-12 rounded-xl bg-blush-100 border border-blush-200 flex items-center justify-center text-blush-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Categories</p>
+          <h3 class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.total_categories }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Management Section -->
+    <div class="bg-white rounded-3xl border border-blush-100 shadow-sm overflow-hidden">
+      <!-- Section Header with Search/Filters -->
+      <div class="p-6 md:p-8 border-b border-blush-100 bg-blush-50/30">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <h2 class="font-serif text-2xl text-gray-900 mb-1">Orders Management</h2>
+            <p class="text-xs text-gray-500 font-light">Search, filter and update client purchase states.</p>
+          </div>
+          
+          <form method="GET" action="{{ url_for('main.dashboard') }}" class="flex flex-wrap items-center gap-4">
+            <!-- Search bar -->
+            <div class="relative min-w-[240px] flex-grow sm:flex-grow-0">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </span>
+              <input type="text" name="q" value="{{ search_query }}" placeholder="Search ID, name, email..."
+                     class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors bg-white text-sm text-gray-900 placeholder-gray-400 shadow-sm">
+            </div>
+
+            <!-- Status filter -->
+            <div>
+              <select name="status" onchange="this.form.submit();"
+                      class="px-4 py-2.5 rounded-xl border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 transition-colors bg-white text-sm text-gray-900 shadow-sm">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                <option value="placed" {% if status_filter == 'placed' %}selected{% endif %}>Placed</option>
+                <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+              </select>
+            </div>
+
+            {% if search_query or status_filter != 'all' %}
+              <a href="{{ url_for('main.dashboard') }}" class="text-xs text-blush-600 hover:text-blush-800 transition-colors font-medium border-b border-blush-600">
+                Reset Filters
+              </a>
+            {% endif %}
+            <button type="submit" class="hidden">Submit</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Orders List -->
+      {% if orders %}
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-blush-50/50 text-gray-500 font-medium text-xs uppercase tracking-wider border-b border-blush-100">
+                <th class="p-6">Order ID & Date</th>
+                <th class="p-6">Customer Details</th>
+                <th class="p-6">Payment</th>
+                <th class="p-6">Total</th>
+                <th class="p-6">Status</th>
+                <th class="p-6 text-right">Details</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-blush-100 text-sm text-gray-700">
+              {% for order in orders %}
+                <tr class="hover:bg-blush-50/10 transition-colors">
+                  <!-- Order ID & Date -->
+                  <td class="p-6">
+                    <span class="font-mono text-gray-900 font-semibold block">{{ order.order_id }}</span>
+                    <span class="text-xs text-gray-400 block mt-1">{{ order.created_at }}</span>
+                  </td>
+                  
+                  <!-- Customer Details -->
+                  <td class="p-6">
+                    <span class="font-medium text-gray-900 block">{{ order.full_name }}</span>
+                    <span class="text-xs text-gray-500 block mt-0.5">{{ order.phone }} | {{ order.email }}</span>
+                    <span class="text-xs text-gray-400 block mt-0.5 max-w-xs truncate">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</span>
+                  </td>
+
+                  <!-- Payment Method -->
+                  <td class="p-6">
+                    <span class="uppercase font-medium text-xs px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-800">
+                      {{ order.payment_method }}
+                    </span>
+                  </td>
+
+                  <!-- Total Amount -->
+                  <td class="p-6 font-semibold text-gray-900">
+                    ₹{{ "%.2f"|format(order.total_amount) }}
+                  </td>
+
+                  <!-- Status Dropdown / Action -->
+                  <td class="p-6">
+                    <form method="POST" action="{{ url_for('main.admin_update_order_status', order_id=order.order_id) }}" class="inline-block">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <select name="status" onchange="this.form.submit();"
+                              class="text-xs font-semibold px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blush-300 transition-colors bg-white
+                              {% if order.status == 'placed' %}
+                                text-blue-600 bg-blue-50 border-blue-200
+                              {% elif order.status == 'processing' %}
+                                text-yellow-600 bg-yellow-50 border-yellow-200
+                              {% elif order.status == 'shipped' %}
+                                text-orange-600 bg-orange-50 border-orange-200
+                              {% elif order.status == 'completed' %}
+                                text-green-600 bg-green-50 border-green-200
+                              {% else %}
+                                text-red-600 bg-red-50 border-red-200
+                              {% endif %}">
+                        <option value="placed" {% if order.status == 'placed' %}selected{% endif %}>Placed</option>
+                        <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                      </select>
+                    </form>
+                  </td>
+
+                  <!-- Items Toggle / Details -->
+                  <td class="p-6 text-right">
+                    <button onclick="toggleDetails('details-{{ order.order_id }}')" class="text-xs text-blush-600 hover:text-blush-800 font-medium inline-flex items-center gap-1">
+                      View items
+                      <svg class="w-3.5 h-3.5 transition-transform duration-200" id="icon-{{ order.order_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                  </td>
+                </tr>
+                
+                <!-- Expanded details section -->
+                <tr id="details-{{ order.order_id }}" class="hidden bg-gray-50">
+                  <td colspan="6" class="p-0 border-t border-gray-100">
+                    <div class="p-6">
+                      <div class="flex justify-between items-center mb-4">
+                          <h4 class="font-medium text-gray-900">Order Summary</h4>
+                          <a href="{{ url_for('main.admin_order_detail', order_id=order.order_id) }}" class="text-xs font-medium text-blush-600 hover:text-blush-800 bg-white border border-blush-200 px-3 py-1.5 rounded-lg shadow-sm">
+                              View Full Details &rarr;
+                          </a>
+                      </div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        <!-- Order items list -->
+                        <div class="space-y-4">
+                            <!-- Items List -->
+                            {% if order.items %}
+                              {% for item in order.items %}
+                                <div class="flex items-center gap-4 p-4">
+                                  <div class="w-14 h-14 bg-blush-50 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-blush-100">
+                                    {% if item.image %}
+                                      <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                      <svg class="w-6 h-6 text-blush-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {% endif %}
+                                  </div>
+                                  <div class="flex-grow">
+                                    <h5 class="font-medium text-gray-900">{{ item.name }}</h5>
+                                    <p class="text-xs text-gray-500 mt-0.5">₹{{ "%.2f"|format(item.price) }} × {{ item.quantity }}</p>
+                                  </div>
+                                  <span class="font-semibold text-gray-900">₹{{ "%.2f"|format(item.price * item.quantity) }}</span>
+                                </div>
+                              {% endfor %}
+                            {% else %}
+                              <p class="p-4 text-xs text-gray-400">No items listed for this order.</p>
+                            {% endif %}
+                          </div>
+                        </div>
+
+                        <!-- Customer delivery sheet -->
+                        <div class="bg-white border border-blush-100 rounded-2xl p-6">
+                          <h5 class="font-serif text-sm font-semibold text-gray-900 mb-3 border-b border-blush-50 pb-2 uppercase tracking-wide">Shipping & Payment Info</h5>
+                          <div class="space-y-2 text-xs">
+                            <p><span class="text-gray-400">Recipient Name:</span> <strong class="text-gray-900 font-medium">{{ order.full_name }}</strong></p>
+                            <p><span class="text-gray-400">Delivery Address:</span> <span class="text-gray-800">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</span></p>
+                            <p><span class="text-gray-400">Phone Contact:</span> <span class="text-gray-800">{{ order.phone }}</span></p>
+                            <p><span class="text-gray-400">Email Address:</span> <span class="text-gray-800">{{ order.email }}</span></p>
+                            <p><span class="text-gray-400">Method of Payment:</span> <strong class="text-gray-900 uppercase">{{ order.payment_method }}</strong></p>
+                            
+                            {% if order.payment_meta %}
+                              <div class="mt-3 p-3 bg-blush-50/50 rounded-xl border border-blush-100">
+                                <p class="text-xs font-semibold text-blush-800 mb-1">Metadata Details</p>
+                                <span class="font-mono text-[10px] text-gray-600 block break-words">{{ order.payment_meta }}</span>
+                              </div>
+                            {% endif %}
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-20 bg-blush-50/30">
+          <div class="mx-auto w-16 h-16 bg-white border border-blush-100 rounded-3xl flex items-center justify-center text-blush-400 mb-4 shadow-sm">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+          </div>
+          <h3 class="font-serif text-lg text-gray-900 mb-1">No orders found</h3>
+          <p class="text-gray-500 font-light text-sm">No orders match your filter criteria.</p>
+        </div>
+      {% endif %}
+    </div>
+
+</div>
+<script>
+  function toggleDetails(id) {
+    const row = document.getElementById(id);
+    const orderId = id.replace('details-', '');
+    const icon = document.getElementById('icon-' + orderId);
+    
+    if (row.classList.contains('hidden')) {
+      row.classList.remove('hidden');
+      if (icon) icon.classList.add('rotate-180');
+    } else {
+      row.classList.add('hidden');
+      if (icon) icon.classList.remove('rotate-180');
+    }
+  }
+</script>
+{% endblock %}

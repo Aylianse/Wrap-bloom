@@ -1,0 +1,176 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Manage Products — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="font-serif text-3xl text-gray-900 mb-1">Products</h1>
+      <p class="text-sm text-gray-500 font-light">Manage your store's inventory and catalog.</p>
+    </div>
+    <div class="flex gap-3">
+      <a href="{{ url_for('main.add') }}" class="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Product
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="mb-6 p-4 bg-white border border-gray-200 rounded-2xl shadow-sm">
+    <form method="GET" action="{{ url_for('main.admin_products') }}" class="flex flex-wrap items-center gap-4 justify-between">
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <!-- Search input -->
+        <div class="relative min-w-[240px] flex-grow sm:flex-grow-0">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input type="text" name="q" value="{{ search_query }}" placeholder="Search products..."
+                 class="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-gray-50 text-sm text-gray-900 placeholder-gray-400">
+        </div>
+
+        <!-- Category filter -->
+        <div>
+          <select name="category" onchange="this.form.submit();"
+                  class="px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-gray-50 text-sm text-gray-900">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+              <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div>
+          <select name="sort" onchange="this.form.submit();"
+                  class="px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-gray-50 text-sm text-gray-900">
+            <option value="">Newest First</option>
+            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price (Low to High)</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price (High to Low)</option>
+            <option value="stock_asc" {% if sort_by == 'stock_asc' %}selected{% endif %}>Stock (Low to High)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        {% if search_query or selected_category or sort_by %}
+          <a href="{{ url_for('main.admin_products') }}" class="text-xs text-gray-500 hover:text-gray-900 transition-colors font-medium underline">
+            Clear Filters
+          </a>
+        {% endif %}
+        <button type="submit" class="hidden">Apply</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Products Table -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-4 w-16">Image</th>
+            <th class="px-6 py-4">Product Details</th>
+            <th class="px-6 py-4">Category</th>
+            <th class="px-6 py-4">Price</th>
+            <th class="px-6 py-4">Stock</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          {% for product in products %}
+          <tr class="hover:bg-gray-50/50 transition-colors group">
+            <td class="px-6 py-4">
+              <div class="w-12 h-12 rounded-lg border border-gray-200 bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0">
+                {% if product.image %}
+                  <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="w-full h-full object-cover">
+                {% else %}
+                  <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                {% endif %}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">{{ product.name }}</div>
+              <div class="text-xs text-gray-400 font-mono mt-0.5">ID: {{ product.id }}</div>
+            </td>
+            <td class="px-6 py-4 text-gray-500">
+              {{ product.category if product.category else '<span class="text-gray-300 italic">None</span>'|safe }}
+            </td>
+            <td class="px-6 py-4 font-medium text-gray-900">
+              ₹{{ "%.2f"|format(product.price) }}
+            </td>
+            <td class="px-6 py-4">
+              {% if product.stock <= 5 %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                  {{ product.stock }}
+                </span>
+              {% else %}
+                <span class="text-gray-600">{{ product.stock }}</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4">
+              {% if product.is_active %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                  Active
+                </span>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                  Draft
+                </span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <!-- Toggle visibility -->
+                <form method="POST" action="{{ url_for('main.admin_toggle_product', product_id=product.id) }}" class="inline-block">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="text-gray-400 hover:text-gray-700 p-1.5" title="Toggle Visibility">
+                    {% if product.is_active %}
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    {% else %}
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                    {% endif %}
+                  </button>
+                </form>
+                
+                <!-- Duplicate -->
+                <form method="POST" action="{{ url_for('main.admin_duplicate_product', product_id=product.id) }}" class="inline-block">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="text-gray-400 hover:text-gray-700 p-1.5" title="Duplicate">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  </button>
+                </form>
+
+                <!-- Edit -->
+                <a href="{{ url_for('main.admin_edit_product', product_id=product.id) }}" class="text-blue-500 hover:text-blue-700 p-1.5" title="Edit">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </a>
+
+                <!-- Delete -->
+                <form method="POST" action="{{ url_for('main.admin_delete_product', product_id=product.id) }}" onsubmit="return confirm('Delete this product permanently?');" class="inline-block">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="text-red-500 hover:text-red-700 p-1.5" title="Delete">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+              <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+              <p class="text-base font-medium text-gray-900">No products found</p>
+              <p class="text-sm mt-1">Try adjusting your filters or add a new product.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
