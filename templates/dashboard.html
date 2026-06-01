@@ -254,6 +254,70 @@
       {% endif %}
     </div>
 
+    <!-- Client Messages Section -->
+    <div class="bg-white rounded-3xl border border-blush-100 shadow-sm overflow-hidden mt-10">
+      <div class="p-6 md:p-8 border-b border-blush-100 bg-blush-50/30">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-serif text-2xl text-gray-900 mb-1">Client Messages</h2>
+            <p class="text-xs text-gray-500 font-light">Inquiries and messages received from the contact form.</p>
+          </div>
+          {% if messages %}
+          <span class="inline-flex items-center rounded-full bg-blush-100 px-3 py-1 text-xs font-semibold text-blush-700 border border-blush-200">
+            {{ messages|length }} message{{ 's' if messages|length != 1 else '' }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if messages %}
+        <div class="divide-y divide-blush-50">
+          {% for msg in messages %}
+            <div class="p-6 hover:bg-blush-50/20 transition-colors group">
+              <div class="flex items-start justify-between gap-4">
+                <!-- Sender Info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="w-9 h-9 rounded-full bg-blush-100 border border-blush-200 flex items-center justify-center flex-shrink-0">
+                      <span class="text-blush-700 font-bold text-sm">{{ msg.name[0]|upper }}</span>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900 text-sm">{{ msg.name }}</h4>
+                      <p class="text-xs text-gray-400">{{ msg.email }}{% if msg.phone %} · {{ msg.phone }}{% endif %}</p>
+                    </div>
+                  </div>
+
+                  {% if msg.subject %}
+                  <p class="text-sm font-medium text-gray-700 mb-1.5">{{ msg.subject }}</p>
+                  {% endif %}
+                  <p class="text-sm text-gray-600 font-light leading-relaxed">{{ msg.message }}</p>
+                  <p class="text-xs text-gray-300 mt-2">{{ msg.created_at }}</p>
+                </div>
+
+                <!-- Delete Button -->
+                <form method="POST" action="{{ url_for('main.admin_delete_message', message_id=msg.id) }}"
+                      onsubmit="return confirm('Delete this message?');"
+                      class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete message">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-16 bg-blush-50/20">
+          <div class="mx-auto w-14 h-14 bg-white border border-blush-100 rounded-2xl flex items-center justify-center text-blush-400 mb-4 shadow-sm">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <h3 class="font-serif text-lg text-gray-900 mb-1">No messages yet</h3>
+          <p class="text-gray-500 font-light text-sm">Messages from the contact form will appear here.</p>
+        </div>
+      {% endif %}
+    </div>
+
 </div>
 <script>
   function toggleDetails(id) {
@@ -271,3 +335,4 @@
   }
 </script>
 {% endblock %}
+

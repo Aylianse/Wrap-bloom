@@ -25,6 +25,9 @@ from models.product import (
     delete_category_by_id,
     toggle_product_active,
     duplicate_product,
+    add_contact_message,
+    get_all_contact_messages,
+    delete_contact_message,
 )
 from routes.auth import login_required
 
@@ -208,7 +211,17 @@ def products():
 
 @main_bp.route("/categories")
 def categories():
-    return render_template("categories.html", categories=_get_categories_list())
+    db_categories = get_all_categories()
+    categories_list = []
+    for cat in db_categories:
+        c = dict(cat)
+        products_in_cat = get_products_by_category(c["name"])
+        c["product_count"] = len([p for p in products_in_cat if p["is_active"]])
+        if not c.get("image"):
+            first_active_prod_img = next((p["image"] for p in products_in_cat if p["image"] and p["is_active"]), None)
+            c["fallback_image"] = first_active_prod_img
+        categories_list.append(c)
+    return render_template("categories.html", categories=categories_list)
 
 
 @main_bp.route("/categories/<category_name>")
@@ -220,9 +233,28 @@ def category_products(category_name):
     return redirect(url_for("main.products", category=category_name))
 
 
-@main_bp.route("/contact")
+@main_bp.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+        subject = request.form.get("subject", "").strip()
+        message = request.form.get("message", "").strip()
+        
+        if not name or not email or not message:
+            flash("Name, Email, and Message are required.", "error")
+            return render_template("contact.html", form_data=request.form)
+            
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            flash("Please enter a valid email address.", "error")
+            return render_template("contact.html", form_data=request.form)
+            
+        add_contact_message(name, email, phone or None, subject or None, message)
+        flash("Thank you! Your message has been received.", "success")
+        return redirect(url_for("main.contact"))
+        
+    return render_template("contact.html", form_data={})
 
 
 @main_bp.route("/dashboard")
@@ -240,14 +272,27 @@ def dashboard():
         o["items"] = get_order_items_by_order_id(order["order_id"])
         orders.append(o)
     
+    messages = get_all_contact_messages()
+    
     return render_template(
         "dashboard.html",
         stats=stats,
         orders=orders,
         status_filter=status_filter,
         search_query=search_query,
+        messages=messages,
         csrf_token=_get_csrf_token()
     )
+
+
+@main_bp.route("/admin/messages/<int:message_id>/delete", methods=["POST"])
+@login_required
+def admin_delete_message(message_id):
+    if not _require_csrf():
+        return redirect(url_for("main.dashboard"))
+    delete_contact_message(message_id)
+    flash("Message deleted successfully.", "success")
+    return redirect(url_for("main.dashboard"))
 
 
 @main_bp.route("/admin/orders/<order_id>/status", methods=["POST"])
@@ -741,7 +786,25 @@ def admin_categories():
             name = request.form.get("name", "").strip()
             if not name:
                 flash("Category name is required.", "error")
-            elif add_category(name):
+                return redirect(url_for("main.admin_categories"))
+                
+            image = request.files.get("image")
+            image_filename = None
+            if image and image.filename:
+                if not _allowed_image(image.filename):
+                    flash("Invalid image type. Allowed: PNG, JPG, JPEG, GIF, WEBP.", "error")
+                    return redirect(url_for("main.admin_categories"))
+                    
+                original_name = secure_filename(image.filename)
+                ext = original_name.rsplit(".", 1)[1].lower()
+                image_filename = f"{uuid.uuid4().hex}.{ext}"
+                
+                upload_dir = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"])
+                os.makedirs(upload_dir, exist_ok=True)
+                upload_path = os.path.join(upload_dir, image_filename)
+                image.save(upload_path)
+                
+            if add_category(name, image_filename):
                 flash(f"Category '{name}' added successfully.", "success")
             else:
                 flash(f"Category '{name}' already exists or is invalid.", "error")

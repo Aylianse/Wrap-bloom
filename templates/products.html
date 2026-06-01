@@ -3,81 +3,140 @@
 {% block title %}Products — Wrap & Bloom{% endblock %}
 
 {% block content %}
-<section class="py-16 bg-white">
+<section class="py-16 bg-white min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
         <div class="text-center mb-12">
-            <h1 class="font-serif text-4xl text-gray-900 mb-3">
-                {% if selected_category %}{{ selected_category }}{% else %}All Products{% endif %}
+            <span class="inline-flex items-center rounded-full border border-blush-200 bg-blush-50/50 px-3.5 py-1 text-xs uppercase tracking-[0.2em] text-blush-700 mb-4">
+                Our Collection
+            </span>
+            <h1 class="font-serif text-4xl sm:text-5xl text-gray-900 mb-3">
+                {% if selected_category %}{{ selected_category }}{% else %}All Creations{% endif %}
             </h1>
-            <p class="text-gray-500 font-light">
-                {% if selected_category %}Curated picks from this category.{% else %}Discover our full collection.{% endif %}
+            <p class="text-gray-500 font-light max-w-xl mx-auto leading-relaxed">
+                Explore our selection of handcrafted floral arrangements, custom gifting wrappers, and bouquets tailored for every celebration.
             </p>
         </div>
 
-        <!-- Search, Category & Sort Filters -->
-        <div class="mb-12 p-6 bg-blush-50/30 border border-blush-100 rounded-3xl">
-          <form method="GET" action="{{ url_for('main.products') }}" class="flex flex-col lg:flex-row gap-6 items-center justify-between">
-            <!-- Categories Pills -->
-            <div class="w-full lg:w-auto flex flex-wrap gap-2 justify-center lg:justify-start">
-              <a href="{{ url_for('main.products', q=search_query, sort=sort_by) }}" 
-                 class="px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200
-                 {% if not selected_category %}
-                   bg-gray-900 text-white border-gray-900
-                 {% else %}
-                   bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
-                 {% endif %}">
-                All Shop
-              </a>
-              {% for category in categories %}
-                <a href="{{ url_for('main.products', category=category, q=search_query, sort=sort_by) }}" 
-                   class="px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200
-                   {% if selected_category == category %}
-                     bg-gray-900 text-white border-gray-900
-                   {% else %}
-                     bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
-                   {% endif %}">
-                  {{ category }}
-                </a>
-              {% endfor %}
+        <!-- Filters Section -->
+        <div class="mb-12 bg-gradient-to-br from-white to-blush-50/30 border border-blush-100 rounded-3xl p-6 md:p-8 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                
+                <!-- Col 1: Search & Categories -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Search Input -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Search Creations</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </span>
+                            <input type="text" id="search-input" value="{{ search_query }}" placeholder="Type keywords..."
+                                   class="w-full pl-11 pr-10 py-3 rounded-2xl border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-sm text-gray-900 placeholder-gray-400 transition-all shadow-sm">
+                            <button id="clear-search" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 opacity-0 pointer-events-none transition-opacity">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Categories Pills -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Categories</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button data-category-slug="" 
+                                    class="category-pill px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200 shadow-sm
+                                    {% if not selected_category %}
+                                      bg-gray-900 text-white border-gray-900
+                                    {% else %}
+                                      bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
+                                    {% endif %}">
+                                All Shop
+                            </button>
+                            {% for category in categories %}
+                            <button data-category-slug="{{ category|lower }}" 
+                                    class="category-pill px-4 py-2 rounded-full text-xs font-medium border transition-colors duration-200 shadow-sm
+                                    {% if selected_category|lower == category|lower %}
+                                      bg-gray-900 text-white border-gray-900
+                                    {% else %}
+                                      bg-white text-gray-600 border-blush-200 hover:bg-blush-50/50
+                                    {% endif %}">
+                                {{ category }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Colors Filter -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Filter by Theme Color</label>
+                    <div class="grid grid-cols-4 gap-3 max-w-[200px]">
+                        <!-- Pink -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#fca5a5] border border-red-200 flex items-center justify-center transition-all hover:scale-110" data-color="pink" title="Pink / Blush"></button>
+                        <!-- Red -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#dc2626] border border-red-800 flex items-center justify-center transition-all hover:scale-110" data-color="red" title="Red / Crimson"></button>
+                        <!-- White -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#fefefe] border border-gray-300 flex items-center justify-center transition-all hover:scale-110" data-color="white" title="White / Pearl"></button>
+                        <!-- Blue -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#2563eb] border border-blue-800 flex items-center justify-center transition-all hover:scale-110" data-color="blue" title="Blue Royale"></button>
+                        <!-- Purple -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#7c3aed] border border-purple-800 flex items-center justify-center transition-all hover:scale-110" data-color="purple" title="Purple"></button>
+                        <!-- Black -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#111827] border border-black flex items-center justify-center transition-all hover:scale-110" data-color="black" title="Black Graduation"></button>
+                        <!-- Yellow/Gold -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#eab308] border border-yellow-600 flex items-center justify-center transition-all hover:scale-110" data-color="yellow" title="Yellow / Gold"></button>
+                        <!-- Pastel/Cream -->
+                        <button class="color-swatch w-9 h-9 rounded-full bg-[#fed7aa] border border-orange-200 flex items-center justify-center transition-all hover:scale-110" data-color="pastel" title="Pastel / Cream"></button>
+                    </div>
+                </div>
+
+                <!-- Col 3: Price Slider & Sort -->
+                <div class="space-y-6">
+                    <!-- Price range -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Max Price</label>
+                            <span id="price-value" class="text-xs font-semibold text-blush-700 bg-blush-50 border border-blush-200 px-2 py-0.5 rounded-md">₹2000</span>
+                        </div>
+                        <input type="range" id="price-slider" min="0" max="2000" step="50" value="2000"
+                               class="w-full h-2 bg-blush-100 rounded-lg appearance-none cursor-pointer accent-blush-500">
+                    </div>
+
+                    <!-- Sorting -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sort By</label>
+                        <select id="sort-select"
+                                class="w-full px-4 py-3 rounded-2xl border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-sm text-gray-600 shadow-sm transition-all">
+                            <option value="latest" {% if not sort_by %}selected{% endif %}>Latest</option>
+                            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Search and Sorting Inputs -->
-            <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-4 items-center justify-end">
-              <!-- Search bar -->
-              <div class="relative w-full sm:w-[220px]">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </span>
-                <input type="text" name="q" value="{{ search_query }}" placeholder="Search bouquets..."
-                       class="w-full pl-9 pr-4 py-2.5 rounded-full border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-xs text-gray-900 placeholder-gray-400 shadow-sm">
-              </div>
-
-              <!-- Sorting selector -->
-              <div class="relative w-full sm:w-auto">
-                <select name="sort" onchange="this.form.submit();"
-                        class="w-full sm:w-auto px-4 py-2.5 rounded-full border border-blush-200 focus:ring-2 focus:ring-blush-300 focus:border-blush-300 bg-white text-xs text-gray-600 shadow-sm">
-                  <option value="" {% if not sort_by %}selected{% endif %}>Latest</option>
-                  <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-                  <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-                  <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A-Z</option>
-                </select>
-              </div>
-
-              <!-- Keep category in form context -->
-              {% if selected_category %}
-                <input type="hidden" name="category" value="{{ selected_category }}">
-              {% endif %}
-
-              <button type="submit" class="hidden">Submit</button>
+            <!-- Active Filters Status Bar -->
+            <div class="mt-6 pt-4 border-t border-blush-100 flex items-center justify-between text-xs text-gray-400">
+                <span id="results-count">{{ products|length }} products found</span>
+                <span class="italic">Live updates on character press</span>
             </div>
-          </form>
         </div>
 
-        {% if products %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Products Grid -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {% for product in products %}
-            <div class="group bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-blush-50">
-                <div class="aspect-[4/5] bg-blush-50 relative overflow-hidden flex items-center justify-center">
+            <!-- Product Card -->
+            <div class="product-card group bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-blush-50"
+                 data-id="{{ product['id'] }}"
+                 data-name="{{ product['name']|lower }}"
+                 data-category="{{ (product['category'] or '')|lower }}"
+                 data-price="{{ product['price'] }}"
+                 data-colors="{% for color in ['pink', 'white', 'blue', 'purple', 'red', 'black', 'pastel', 'yellow', 'gold', 'crimson', 'blush', 'pearl'] %}{% if color in product['name']|lower %}{{ color }} {% endif %}{% endfor %}">
+                
+                <div class="aspect-[4/5] bg-blush-50 relative overflow-hidden flex items-center justify-center border-b border-blush-50">
                     {% if product["image"] %}
                     <img src="{{ url_for('static', filename='uploads/' + product['image']) }}" alt="{{ product['name'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                     {% else %}
@@ -89,20 +148,20 @@
                 <div class="p-6 text-center">
                     <h3 class="font-serif text-lg text-gray-900 mb-2 truncate">{{ product["name"] }}</h3>
                     {% if product["category"] %}
-                    <p class="text-xs text-gray-500 mb-2">{{ product["category"] }}</p>
+                    <p class="text-xs text-gray-400 mb-2 uppercase tracking-widest font-medium">{{ product["category"] }}</p>
                     {% endif %}
-                    <p class="text-blush-600 font-medium">₹{{ "%.2f"|format(product["price"]) }}</p>
+                    <p class="text-blush-600 font-semibold text-lg">₹{{ "%.2f"|format(product["price"]) }}</p>
 
-                    <div class="mt-4 flex items-center justify-center gap-3">
+                    <div class="mt-5 flex items-center justify-center gap-2">
                         <form method="POST" action="{{ url_for('main.cart_add', product_id=product['id']) }}">
-                            <button type="submit" class="bg-white/90 backdrop-blur-sm text-gray-900 hover:text-blush-600 font-medium text-sm px-5 py-2 rounded-full shadow-sm transition-colors flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            <button type="submit" class="bg-blush-50 hover:bg-blush-100 text-blush-700 font-medium text-xs px-4 py-2.5 rounded-full border border-blush-100 transition-all flex items-center shadow-sm">
+                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                                 Add
                             </button>
                         </form>
                         <form method="POST" action="{{ url_for('main.buy_now', product_id=product['id']) }}">
-                            <button type="submit" class="bg-gray-900 hover:bg-gray-800 text-white font-medium text-sm px-5 py-2 rounded-full shadow-sm transition-colors">
-                                Buy
+                            <button type="submit" class="bg-gray-900 hover:bg-gray-800 text-white font-medium text-xs px-5 py-2.5 rounded-full shadow-md transition-all">
+                                Buy Now
                             </button>
                         </form>
                     </div>
@@ -110,14 +169,206 @@
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="text-center py-12 bg-blush-50 rounded-3xl border border-blush-100 max-w-2xl mx-auto">
-            <p class="text-gray-500 font-light mb-6 text-lg">No products available in this section yet.</p>
-            <a href="{{ url_for('main.add') }}" class="inline-block bg-white text-blush-600 border border-blush-200 hover:bg-blush-50 font-medium px-6 py-3 rounded-full transition-colors shadow-sm">
-                Add Product
-            </a>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-blush-50/50 rounded-3xl border border-blush-100 max-w-2xl mx-auto">
+            <svg class="mx-auto h-16 w-16 text-blush-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="text-gray-500 font-light text-lg mb-6">No creations match your active filters.</p>
+            <button onclick="window.location.href='{{ url_for('main.products') }}'" 
+                    class="bg-white text-blush-600 border border-blush-200 hover:bg-blush-50 font-medium px-6 py-2.5 rounded-full transition-all shadow-sm">
+                Clear Filters
+            </button>
         </div>
-        {% endif %}
+
     </div>
 </section>
+
+<!-- Client Side Filters Logic -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("search-input");
+    const clearSearch = document.getElementById("clear-search");
+    const priceSlider = document.getElementById("price-slider");
+    const priceValue = document.getElementById("price-value");
+    const colorSwatches = document.querySelectorAll(".color-swatch");
+    const categoryPills = document.querySelectorAll(".category-pill");
+    const sortSelect = document.getElementById("sort-select");
+    const productGrid = document.getElementById("product-grid");
+    const productCards = Array.from(document.querySelectorAll(".product-card"));
+    const emptyState = document.getElementById("empty-state");
+    const resultsCount = document.getElementById("results-count");
+
+    let currentSearch = searchInput ? searchInput.value.toLowerCase() : "";
+    let currentMaxPrice = priceSlider ? parseFloat(priceSlider.value) : 2000;
+    let selectedColor = "";
+    
+    // Read category from initial backend rendering if active
+    let selectedCategory = "";
+    const activePill = document.querySelector(".category-pill.bg-gray-900");
+    if (activePill) {
+        selectedCategory = activePill.getAttribute("data-category-slug");
+    }
+
+    function updateFilters() {
+        let visibleCount = 0;
+
+        productCards.forEach(card => {
+            const name = card.getAttribute("data-name");
+            const category = card.getAttribute("data-category");
+            const price = parseFloat(card.getAttribute("data-price"));
+            const colors = card.getAttribute("data-colors");
+
+            // Character / Word-based Search
+            const matchesSearch = currentSearch === "" || name.includes(currentSearch) || category.includes(currentSearch);
+            
+            // Category Pill Filter
+            const matchesCategory = selectedCategory === "" || category === selectedCategory;
+
+            // Price Slider Filter
+            const matchesPrice = price <= currentMaxPrice;
+
+            // Theme Color Filter
+            let matchesColor = true;
+            if (selectedColor !== "") {
+                const colorAliases = {
+                    pink: ["pink", "blush"],
+                    red: ["red", "crimson"],
+                    white: ["white", "pearl", "mesh"],
+                    blue: ["blue"],
+                    purple: ["purple"],
+                    black: ["black"],
+                    yellow: ["yellow", "gold", "pride"],
+                    pastel: ["pastel", "choco", "chocolate"]
+                };
+                const aliases = colorAliases[selectedColor] || [selectedColor];
+                matchesColor = aliases.some(alias => colors.includes(alias));
+            }
+
+            if (matchesSearch && matchesCategory && matchesPrice && matchesColor) {
+                card.style.display = "";
+                // trigger visual animation
+                setTimeout(() => {
+                    card.style.opacity = "1";
+                    card.style.transform = "scale(1)";
+                }, 10);
+                visibleCount++;
+            } else {
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                // smooth transition delay before hide
+                card.style.display = "none";
+            }
+        });
+
+        if (resultsCount) {
+            resultsCount.textContent = `${visibleCount} products found`;
+        }
+
+        if (visibleCount === 0) {
+            emptyState.classList.remove("hidden");
+            productGrid.classList.add("hidden");
+        } else {
+            emptyState.classList.add("hidden");
+            productGrid.classList.remove("hidden");
+        }
+    }
+
+    // Input handlers
+    if (searchInput) {
+        searchInput.addEventListener("input", function(e) {
+            currentSearch = e.target.value.toLowerCase();
+            if (clearSearch) {
+                if (currentSearch.length > 0) {
+                    clearSearch.classList.remove("opacity-0", "pointer-events-none");
+                } else {
+                    clearSearch.classList.add("opacity-0", "pointer-events-none");
+                }
+            }
+            updateFilters();
+        });
+    }
+
+    if (clearSearch) {
+        clearSearch.addEventListener("click", function() {
+            searchInput.value = "";
+            currentSearch = "";
+            clearSearch.classList.add("opacity-0", "pointer-events-none");
+            updateFilters();
+        });
+    }
+
+    if (priceSlider) {
+        priceSlider.addEventListener("input", function(e) {
+            currentMaxPrice = parseFloat(e.target.value);
+            if (priceValue) priceValue.textContent = `₹${currentMaxPrice}`;
+            updateFilters();
+        });
+    }
+
+    colorSwatches.forEach(swatch => {
+        swatch.addEventListener("click", function() {
+            const color = this.getAttribute("data-color");
+            if (selectedColor === color) {
+                selectedColor = "";
+                this.classList.remove("ring-4", "ring-offset-2", "ring-blush-500");
+            } else {
+                colorSwatches.forEach(s => s.classList.remove("ring-4", "ring-offset-2", "ring-blush-500"));
+                selectedColor = color;
+                this.classList.add("ring-4", "ring-offset-2", "ring-blush-500");
+            }
+            updateFilters();
+        });
+    });
+
+    categoryPills.forEach(pill => {
+        pill.addEventListener("click", function(e) {
+            e.preventDefault();
+            const cat = this.getAttribute("data-category-slug");
+            
+            categoryPills.forEach(p => {
+                p.classList.remove("bg-gray-900", "text-white", "border-gray-900");
+                p.classList.add("bg-white", "text-gray-600", "border-blush-200");
+            });
+
+            if (selectedCategory === cat) {
+                selectedCategory = "";
+                const allPill = document.querySelector('[data-category-slug=""]');
+                if (allPill) {
+                    allPill.classList.remove("bg-white", "text-gray-600", "border-blush-200");
+                    allPill.classList.add("bg-gray-900", "text-white", "border-gray-900");
+                }
+            } else {
+                selectedCategory = cat;
+                this.classList.remove("bg-white", "text-gray-600", "border-blush-200");
+                this.classList.add("bg-gray-900", "text-white", "border-gray-900");
+            }
+            updateFilters();
+        });
+    });
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function() {
+            const criteria = this.value;
+            let sortedCards = [...productCards];
+
+            if (criteria === "price_asc") {
+                sortedCards.sort((a, b) => parseFloat(a.getAttribute("data-price")) - parseFloat(b.getAttribute("data-price")));
+            } else if (criteria === "price_desc") {
+                sortedCards.sort((a, b) => parseFloat(b.getAttribute("data-price")) - parseFloat(a.getAttribute("data-price")));
+            } else if (criteria === "name_asc") {
+                sortedCards.sort((a, b) => a.getAttribute("data-name").localeCompare(b.getAttribute("data-name")));
+            } else {
+                sortedCards.sort((a, b) => parseInt(b.getAttribute("data-id")) - parseInt(a.getAttribute("data-id")));
+            }
+
+            if (productGrid) {
+                sortedCards.forEach(card => productGrid.appendChild(card));
+            }
+        });
+    }
+
+    // Run initial filter check
+    updateFilters();
+});
+</script>
 {% endblock %}

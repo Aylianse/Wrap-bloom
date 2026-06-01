@@ -59,6 +59,14 @@ def init_db():
         )
     """)
 
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id   INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT    NOT NULL UNIQUE,
+            image TEXT
+        )
+    """)
+
     # Auto-migrate older DBs created before image/category/etc fields existed.
     columns = {row["name"] for row in db.execute("PRAGMA table_info(products)").fetchall()}
     if "image" not in columns:
@@ -72,10 +80,20 @@ def init_db():
     if "is_active" not in columns:
         db.execute("ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1")
 
+    cat_cols = {row["name"] for row in db.execute("PRAGMA table_info(categories)").fetchall()}
+    if "image" not in cat_cols:
+        db.execute("ALTER TABLE categories ADD COLUMN image TEXT")
+
+    # Create contact_messages table
     db.execute("""
-        CREATE TABLE IF NOT EXISTS categories (
-            id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT    NOT NULL UNIQUE
+        CREATE TABLE IF NOT EXISTS contact_messages (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT    NOT NULL,
+            email      TEXT    NOT NULL,
+            phone      TEXT,
+            subject    TEXT,
+            message    TEXT    NOT NULL,
+            created_at TEXT    NOT NULL DEFAULT (datetime('now'))
         )
     """)
 
@@ -337,11 +355,11 @@ def get_all_categories():
     return categories
 
 
-def add_category(name):
+def add_category(name, image=None):
     db = get_db()
     success = False
     try:
-        db.execute("INSERT INTO categories (name) VALUES (?)", (name,))
+        db.execute("INSERT INTO categories (name, image) VALUES (?, ?)", (name, image))
         db.commit()
         success = True
     except sqlite3.IntegrityError:
@@ -378,3 +396,27 @@ def update_category(category_id, new_name):
             pass
     db.close()
     return success
+
+
+def add_contact_message(name, email, phone=None, subject=None, message=None):
+    db = get_db()
+    db.execute(
+        "INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)",
+        (name, email, phone, subject, message)
+    )
+    db.commit()
+    db.close()
+
+
+def get_all_contact_messages():
+    db = get_db()
+    messages = db.execute("SELECT * FROM contact_messages ORDER BY created_at DESC").fetchall()
+    db.close()
+    return messages
+
+
+def delete_contact_message(message_id):
+    db = get_db()
+    db.execute("DELETE FROM contact_messages WHERE id = ?", (message_id,))
+    db.commit()
+    db.close()
